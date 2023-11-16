@@ -1,5 +1,9 @@
-notebook
+flask
 jupyterlab
+notebook
+streamlit
+openai
+python-dotenv
 # jupysql
 # duckdb
 # duckdb-engine
