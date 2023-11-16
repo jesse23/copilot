@@ -1,0 +1,16 @@
+{
+  "name": "peng-example",
+  "version": "1.0.0",
+  "description": "prompt engineering example",
+  "author": "jesse23",
+  "license": "MIT",
+  "scripts": {
+    "audit": "npm run audit -ws",
+    "build": "npm run build -ws",
+    "test": "npm run test -ws"
+  },
+  "workspaces": [
+    "apps/*",
+    "libs/*"
+  ]
+}
