@@ -1,5 +1,5 @@
 from openai import OpenAI
-from _local_ps_template import ps_template_map
+from ps_template_example import ps_template_map
 from dotenv import load_dotenv
 
 # load secrets from .env file
