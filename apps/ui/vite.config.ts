@@ -5,7 +5,13 @@ import { viteSingleFile } from "vite-plugin-singlefile"
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [tsconfigPaths(), react(), viteSingleFile()],
+  plugins: [tsconfigPaths(), react()],
+  base: '',
+  /*
+  build: {
+    assetsDir: 'assets',
+  },
+  */
   server: {
     proxy: {
       // Proxying requests on /api to a backend server running on a different port

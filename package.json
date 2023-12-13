@@ -1,7 +1,7 @@
 {
-  "name": "peng-example",
+  "name": "copilot",
   "version": "1.0.0",
-  "description": "prompt engineering example",
+  "description": "example for copilot",
   "author": "jesse23",
   "license": "MIT",
   "scripts": {
