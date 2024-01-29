@@ -5,12 +5,13 @@ import { CopilotProvider, CopilotWidget } from "./components";
 import { SampleEditor, SampleForm, SampleChat } from "./views";
 import { eventBus } from "./libs";
 import { EVENT_COPILOT_DEBUG } from "./const";
+import { MonacoEditor } from "./components/MonacoEditor";
 
 const MODE = {
   EDITOR: "json_editor",
   FORM: "form_example",
-  CHAT: "chat",
-  // TREE: "compare_tree",
+  CHAT: "chat_bot",
+  CODE: "code_completion",
 };
 
 export default function App() {
@@ -69,8 +70,8 @@ export default function App() {
           >
             {mode === MODE.EDITOR && <SampleEditor />}
             {mode === MODE.FORM && <SampleForm />}
-            {mode === MODE.TREE && <div>tree</div>}
             {mode === MODE.CHAT && <SampleChat />}
+            {mode === MODE.CODE && <MonacoEditor code='' type='js' onChange={()=>{}} />}
           </GridItem>
           <GridItem
             pl="2"
@@ -95,20 +96,20 @@ export default function App() {
               {mode === MODE.FORM ? "*" : " "}
             </Link>
             <Link
-              onClick={() => setMode(MODE.TREE)}
-              paddingRight={5}
-              fontFamily={"mono"}
-            >
-              {MODE.TREE}
-              {mode === MODE.TREE ? "*" : " "}
-            </Link>
-            <Link
               onClick={() => setMode(MODE.CHAT)}
-              paddingRight={70}
+              paddingRight={5}
               fontFamily={"mono"}
             >
               {MODE.CHAT}
               {mode === MODE.CHAT ? "*" : " "}
+            </Link>
+            <Link
+              onClick={() => setMode(MODE.CODE)}
+              paddingRight={70}
+              fontFamily={"mono"}
+            >
+              {MODE.CODE}
+              {mode === MODE.CODE ? "*" : " "}
             </Link>
             <div
               style={{

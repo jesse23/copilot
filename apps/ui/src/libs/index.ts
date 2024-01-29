@@ -1,3 +1,3 @@
 export * from './eventBus';
 export * from './utils';
-export * from './prompt';
+export * from './web_llm/prompt';

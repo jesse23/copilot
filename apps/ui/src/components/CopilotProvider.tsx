@@ -1,48 +1,35 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { createPrompt, eventBus, wait, Subscription } from "../libs";
-import { createChat } from "../libs/llm";
+import { eventBus, wait, Subscription } from "../libs";
+import { queryLLM as queryWebLLM, initWebLLM } from "../libs/web_llm";
+import { queryLLM as queryOpenAI } from "../libs/openai";
 import {
   EVENT_COPILOT_DEBUG,
   EVENT_COPILOT_QUERY,
   EVENT_COPILOT_UPDATE,
-  EVENT_COPILOT_ENABLE,
+  EVENT_COPILOT_MODE_CHANGE,
+  MODE_WEBLLM,
+  MODE_SERVER,
+  MODE_OPENAI,
 } from "../const";
-
-const MODE = {
-  CLIENT: "client",
-  SERVER: "server",
-  MOCK: "mock",
-};
-
-const LLM_MODE = MODE.CLIENT;
 
 const CopilotContext = createContext(null);
 
-// NOTE: hack for react debug - react debug will load the hook twice in purpose
-const ctx = {
-  clientChatInitPromise: null,
-};
-
 export const CopilotProvider = ({ children }) => {
+  const [key, setKey] = useState('');
   const [category, setCategory] = useState("");
-  const [llmEnabled, setLlmEnabled] = useState(false);
+  const llmMode = useRef('');
 
   const copilotSubs = useRef([] as Subscription[]);
-
-  useEffect(() => {
-    if (llmEnabled && !ctx.clientChatInitPromise) {
-      ctx.clientChatInitPromise = createChat({
-        progressCallback: (msg) => eventBus.publish(EVENT_COPILOT_DEBUG, msg),
-      });
-    }
-  }, [llmEnabled]);
 
   // subscribe to copilot query
   useEffect(() => {
     copilotSubs.current.push({
-      topic: EVENT_COPILOT_ENABLE,
-      handler: eventBus.subscribe(EVENT_COPILOT_ENABLE, ({ enabled }) => {
-        setLlmEnabled(enabled);
+      topic: EVENT_COPILOT_MODE_CHANGE,
+      handler: eventBus.subscribe(EVENT_COPILOT_MODE_CHANGE, ({ mode }) => {
+        if (mode === MODE_WEBLLM) {
+          initWebLLM((msg) => eventBus.publish(EVENT_COPILOT_DEBUG, msg));
+        }
+        llmMode.current = mode;
       }),
     });
 
@@ -51,17 +38,21 @@ export const CopilotProvider = ({ children }) => {
       handler: eventBus.subscribe(
         EVENT_COPILOT_QUERY,
         async ({ category, query }) => {
-          if (LLM_MODE === MODE.CLIENT && ctx.clientChatInitPromise) {
-            const clientChatObj = await ctx.clientChatInitPromise;
-            clientChatObj
-              .generate(createPrompt(category, query))
-              .then((resp) => {
-                eventBus.publish(EVENT_COPILOT_UPDATE, {
-                  category,
-                  response: resp,
-                });
+          if (llmMode.current === MODE_WEBLLM) {
+            queryWebLLM(category, query).then((resp) => {
+              eventBus.publish(EVENT_COPILOT_UPDATE, {
+                category,
+                response: resp,
               });
-          } else if (LLM_MODE === MODE.SERVER) {
+            });
+          } else if (llmMode.current === MODE_OPENAI) {
+            queryOpenAI(category, query).then((resp) => {
+              eventBus.publish(EVENT_COPILOT_UPDATE, {
+                category,
+                response: resp,
+              });
+            });
+          } else if (llmMode.current === MODE_SERVER) {
             fetch("/llm", {
               method: "POST", // Specify the method
               headers: {
@@ -83,13 +74,14 @@ export const CopilotProvider = ({ children }) => {
                 console.error("Error:", error); // Handle any errors
               });
           } else {
+            // default mode === MODE_MOCK
             wait(1000).then(() => {
               eventBus.publish(EVENT_COPILOT_UPDATE, {
                 category,
                 response: `{ "commands": { "t": { "id": "echo \`${query}\` as mock"} } }`,
               });
             });
-          }
+          } 
         }
       ),
     });

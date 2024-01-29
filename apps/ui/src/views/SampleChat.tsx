@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Allotment } from "allotment";
 import { eventBus } from "../libs";
 import { useCopilot, CodeEditor } from "../components";
-import '../libs/llm';
+import '../libs/web_llm';
 import styles from "./views.module.css";
 import "allotment/dist/style.css";
 import { CATEGORY_CHAT, EVENT_COPILOT_QUERY, EVENT_COPILOT_UPDATE} from "../const";

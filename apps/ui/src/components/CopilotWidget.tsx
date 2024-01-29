@@ -11,12 +11,22 @@ import {
   Spinner,
   Checkbox,
   Grid,
+  Select,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useCopilot } from ".";
 import { eventBus, debounce } from "../libs";
-import { EVENT_COPILOT_DEBUG, EVENT_COPILOT_QUERY, EVENT_COPILOT_UPDATE, EVENT_COPILOT_ENABLE } from "../const";
+import {
+  EVENT_COPILOT_DEBUG,
+  EVENT_COPILOT_QUERY,
+  EVENT_COPILOT_UPDATE,
+  EVENT_COPILOT_MODE_CHANGE,
+  MODE_WEBLLM,
+  MODE_MOCK,
+  MODE_SERVER,
+  MODE_OPENAI,
+} from "../const";
 
 export const CopilotWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,7 +35,6 @@ export const CopilotWidget = () => {
   const [query, setQuery] = useState("");
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
-  const [llmEnabled, setLlmEnabled] = useState(false);
 
   useHotkeys(
     "mod+p,ctrl+p",
@@ -71,15 +80,21 @@ export const CopilotWidget = () => {
     }
   }, [query]);
 
-  useEffect(() => {
-    if (llmEnabled) {
-      eventBus.publish(EVENT_COPILOT_ENABLE, {enabled: true});
-    }
-  }, [llmEnabled]);
-
   return (
-    <Grid templateColumns="repeat(2, 1fr)" gap={1}>
-      <Checkbox isChecked={llmEnabled} onChange={e => setLlmEnabled(e.target.checked)}>Enable WebLLM</Checkbox>
+    <Grid templateColumns="repeat(2, 0.7fr)" gap={3}>
+      <Select
+        defaultValue={MODE_MOCK}
+        onChange={(e) =>
+          eventBus.publish(EVENT_COPILOT_MODE_CHANGE, { mode: e.target.value })
+        }
+      >
+        <option value={MODE_MOCK}>
+          Mock
+        </option>
+        <option value={MODE_WEBLLM}>WebLLM (require 4GB cache)</option>
+        <option value={MODE_OPENAI}>OpenAI (require api-key)</option>
+        <option value={MODE_SERVER}>PyServer (localhost debug)</option>
+      </Select>
       <Popover
         initialFocusRef={initialFocusRef}
         returnFocusOnClose={true}
