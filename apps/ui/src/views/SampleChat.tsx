@@ -5,7 +5,7 @@ import { useCopilot, CodeEditor } from "../components";
 import '../libs/llm';
 import styles from "./views.module.css";
 import "allotment/dist/style.css";
-import { CATEGORY_CHAT} from "../const";
+import { CATEGORY_CHAT, EVENT_COPILOT_QUERY, EVENT_COPILOT_UPDATE} from "../const";
 
 const CATEGORY = CATEGORY_CHAT;
 
@@ -16,11 +16,11 @@ export function SampleChat() {
   // TODO: this should go with focus/active later
   useEffect(() => {
     setCategory(CATEGORY);
-    const subs = eventBus.subscribe("copilot.update", ({ response }) => {
+    const subs = eventBus.subscribe(EVENT_COPILOT_UPDATE, ({ response }) => {
       setContent(prev => prev + response + "\n")
     });
     return () => {
-      eventBus.unsubscribe("copilot.update", subs);
+      eventBus.unsubscribe(EVENT_COPILOT_UPDATE, subs);
       setCategory("");
     };
   },[]);
@@ -32,7 +32,7 @@ export function SampleChat() {
 
     if (!lastLine && hintLine.startsWith("/// ")) {
       const query = hintLine.replace("/// ", "");
-      eventBus.publish("copilot.query", { category: CATEGORY, query });
+      eventBus.publish(EVENT_COPILOT_QUERY, { category: CATEGORY, query });
     }
   }, [content]);
 

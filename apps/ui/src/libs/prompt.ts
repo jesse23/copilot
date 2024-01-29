@@ -1,31 +1,37 @@
-import { CATEGORY_CHAT, CATEGORY_COMMAND_CONFIG, CATEGORY_FETCH_RULE } from "../const";
+import { CATEGORY_CHAT, CATEGORY_COMMAND_CONFIG, CATEGORY_CREATE_JSON } from "../const";
 
 const PROMPTS = {
     /// what is 'Detroit'?
-    [CATEGORY_CHAT]: "Response should be short. Question:",
+    [CATEGORY_CHAT]: `
+    <s>[INST]You are a helpful assistant that can answer any question in one sentence.[/INST]<s>
+    `,
     /// Given 'ItemRevision.items_tag>Item', rule for traverse and process from Item to ItemRevision
-    [CATEGORY_FETCH_RULE]: `
+    [CATEGORY_CREATE_JSON]: `
     # Concept
-    Given 'A.a>B' (or 'B<a.A') presents class A has an attributes and the value type of the attribute is class B:
-    - If we need to traverse only from A to B, the rule is:
-      CLASS.A:CLASS.B:ATTRIBUTE.a:TRAVERSE
-    - If we need to traverse and process from B to A, the rule is:
-      CLASS.B:CLASS.A:REFBY.a:TRAVERSE+PROCESS
+    <s>[INST] You are a helpful code assistant. Your task is to generate a valid JSON object only without explanation. So for instance the following:
+
+    name: John
+    lastname: Smith
+    address: #1 Samuel St.
     
-    # Format
-    Response should be rule only without quote. Question:
+    would be converted to:[/INST]
+    {
+    "address": "#1 Samuel St.",
+    "lastname": "Smith",
+    "name": "John"
+    }
+    </s>
     `.trim(),
     /// 'paste' command in left wall, visible when it is object set table
     [CATEGORY_COMMAND_CONFIG]: `
-    # Definition
+    <s>[INST] You are a helpful code assistant. Your task is to generate a valid Command configuration JSON object based on the given information. It follows rules below:
     - Command configuration is constructed by 3 parts: commands, commandHandlers and commandPlacements. 
     - All the attributes that we could use are listed in example below.
     - uiAnchor is a string that can be chosen from 'rightWall', 'toolBar', 'leftWall', 'summaryHeader'.
     - icon id is string to find icon in icon library.
     - action for command handler is a function name as string.
 
-    ## Example
-    Below is examples to define 'icon' command and 'home' command.
+    Below is examples to define 'icon' command and 'home' command:[/INST]
     {
       "commands": {
         "iconCommand": {
@@ -76,22 +82,11 @@ const PROMPTS = {
         }
       }
     }
-
-    # Format
-    Response should be JSON only. Question:
-    `
+    </s>
+    `.trim()
 }
 
 
 export const createPrompt = (category: string, query: string) => {
   return `${PROMPTS[category]} ${query}`;
 }
-
-/*
-    ## Relation
-    GIven class C and class D are connected by class E, ( as 'C<primary_object.E.secondary_object>D'), then:
-    - If we need to traverse and process from C to D, the rule is:
-      CLASS.C:CLASS.D:P2S.E:TRAVERSE+PROCESS
-    - If we need to only process from D to C, the rule is:
-      CLASS.D:CLASS.C:S2P.E:PROCESS
-*/

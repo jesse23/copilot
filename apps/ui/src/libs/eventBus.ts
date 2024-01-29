@@ -1,3 +1,8 @@
+export interface Subscription {
+  topic: string;
+  handler: Function;
+}
+
 class EventBus {
  
   events: { [key: string]: Function[] };

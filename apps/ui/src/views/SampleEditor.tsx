@@ -4,22 +4,22 @@ import { eventBus } from "../libs";
 import { useCopilot, CodeEditor } from "../components";
 import styles from "./views.module.css";
 import "allotment/dist/style.css";
-import { CATEGORY_FETCH_RULE } from "../const";
+import { CATEGORY_CREATE_JSON, EVENT_COPILOT_UPDATE, EVENT_COPILOT_QUERY } from "../const";
 
-const CATEGORY = CATEGORY_FETCH_RULE;
+const CATEGORY = CATEGORY_CREATE_JSON;
 
 export function SampleEditor() {
   const { setCategory } = useCopilot();
-  const [content, setContent] = useState("// put config rule below, use `/// ` to start copilot\n");
+  const [content, setContent] = useState("// example for create JSON, use `/// ` to start copilot\n");
 
   // TODO: this should go with focus/active later
   useEffect(() => {
     setCategory(CATEGORY);
-    const subs = eventBus.subscribe("copilot.update", ({ response }) => {
+    const subs = eventBus.subscribe(EVENT_COPILOT_UPDATE, ({ response }) => {
       setContent(prev => prev + response + "\n")
     });
     return () => {
-      eventBus.unsubscribe("copilot.update", subs);
+      eventBus.unsubscribe(EVENT_COPILOT_UPDATE, subs);
       setCategory("");
     };
   },[]);
@@ -31,7 +31,7 @@ export function SampleEditor() {
 
     if (!lastLine && hintLine.startsWith("/// ")) {
       const query = hintLine.replace("/// ", "");
-      eventBus.publish("copilot.query", { category: CATEGORY, query });
+      eventBus.publish(EVENT_COPILOT_QUERY, { category: CATEGORY, query });
     }
   }, [content]);
 

@@ -4,6 +4,7 @@ import { FormControl, FormLabel, Input, Button } from "@chakra-ui/react";
 import { eventBus } from "../libs";
 import { CATEGORY_COMMAND_CONFIG } from "../const";
 import { useCopilot } from "../components";
+import { EVENT_COPILOT_UPDATE} from "../const";
 import styles from "./views.module.css";
 import "allotment/dist/style.css";
 
@@ -29,7 +30,7 @@ export function SampleForm() {
   // TODO: this should go with focus/active later
   useEffect(() => {
     setCategory(CATEGORY_COMMAND_CONFIG);
-    const subs = eventBus.subscribe("copilot.update", ({ response }) => {
+    const subs = eventBus.subscribe(EVENT_COPILOT_UPDATE, ({ response }) => {
       const vm = JSON.parse(response);
       const res = {
         ...((Object.values(vm.commands) || [{}])[0] as Record<string, string>),
@@ -48,7 +49,7 @@ export function SampleForm() {
       setCommand(res);
     });
     return () => {
-      eventBus.unsubscribe("copilot.update", subs);
+      eventBus.unsubscribe(EVENT_COPILOT_UPDATE, subs);
       setCategory("");
     };
   }, []);

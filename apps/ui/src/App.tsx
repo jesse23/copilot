@@ -4,12 +4,13 @@ import { Grid, GridItem, Heading, Link, Spacer, Flex } from "@chakra-ui/react";
 import { CopilotProvider, CopilotWidget } from "./components";
 import { SampleEditor, SampleForm, SampleChat } from "./views";
 import { eventBus } from "./libs";
+import { EVENT_COPILOT_DEBUG } from "./const";
 
 const MODE = {
-  EDITOR: "rule_editor",
-  FORM: "command_form",
-  TREE: "compare_tree",
+  EDITOR: "json_editor",
+  FORM: "form_example",
   CHAT: "chat",
+  // TREE: "compare_tree",
 };
 
 export default function App() {
@@ -17,7 +18,7 @@ export default function App() {
   const [info, setInfo] = useState("");
 
   useEffect(() => {
-    const debugSub = eventBus.subscribe("copilot.debug", (msg) => {
+    const debugSub = eventBus.subscribe(EVENT_COPILOT_DEBUG, (msg) => {
       if(msg.length < 60) {
         msg = msg.trim();
       }else if(msg.length < 200) {
@@ -30,7 +31,7 @@ export default function App() {
     });
 
     return () => {
-      eventBus.unsubscribe("copilot.debug", debugSub);
+      eventBus.unsubscribe(EVENT_COPILOT_DEBUG, debugSub);
     };
   }, []);
 

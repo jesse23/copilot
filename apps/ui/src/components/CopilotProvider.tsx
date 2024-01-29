@@ -1,6 +1,12 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { createPrompt, eventBus, wait } from "../libs";
+import { createPrompt, eventBus, wait, Subscription } from "../libs";
 import { createChat } from "../libs/llm";
+import {
+  EVENT_COPILOT_DEBUG,
+  EVENT_COPILOT_QUERY,
+  EVENT_COPILOT_UPDATE,
+  EVENT_COPILOT_ENABLE,
+} from "../const";
 
 const MODE = {
   CLIENT: "client",
@@ -19,74 +25,79 @@ const ctx = {
 
 export const CopilotProvider = ({ children }) => {
   const [category, setCategory] = useState("");
+  const [llmEnabled, setLlmEnabled] = useState(false);
 
-  const copilotSub = useRef(null);
+  const copilotSubs = useRef([] as Subscription[]);
 
   useEffect(() => {
-    const initChatProvider = async () => {
-      let clientChatObj = null;
-      if (!ctx.clientChatInitPromise) {
-        if (LLM_MODE === MODE.CLIENT) {
-          ctx.clientChatInitPromise = createChat({
-            progressCallback: (msg) => eventBus.publish("copilot.debug", msg),
-          });
-        } else {
-          ctx.clientChatInitPromise = Promise.resolve();
-        }
+    if (llmEnabled && !ctx.clientChatInitPromise) {
+      ctx.clientChatInitPromise = createChat({
+        progressCallback: (msg) => eventBus.publish(EVENT_COPILOT_DEBUG, msg),
+      });
+    }
+  }, [llmEnabled]);
 
-        clientChatObj = await ctx.clientChatInitPromise;
+  // subscribe to copilot query
+  useEffect(() => {
+    copilotSubs.current.push({
+      topic: EVENT_COPILOT_ENABLE,
+      handler: eventBus.subscribe(EVENT_COPILOT_ENABLE, ({ enabled }) => {
+        setLlmEnabled(enabled);
+      }),
+    });
 
-        copilotSub.current = eventBus.subscribe(
-          "copilot.query",
-          ({ category, query }) => {
-            if (LLM_MODE === MODE.CLIENT) {
-              clientChatObj.generate(createPrompt(category, query)).then((resp) => {
-                eventBus.publish("copilot.update", {
+    copilotSubs.current.push({
+      topic: EVENT_COPILOT_QUERY,
+      handler: eventBus.subscribe(
+        EVENT_COPILOT_QUERY,
+        async ({ category, query }) => {
+          if (LLM_MODE === MODE.CLIENT && ctx.clientChatInitPromise) {
+            const clientChatObj = await ctx.clientChatInitPromise;
+            clientChatObj
+              .generate(createPrompt(category, query))
+              .then((resp) => {
+                eventBus.publish(EVENT_COPILOT_UPDATE, {
                   category,
                   response: resp,
                 });
               });
-            } else if (LLM_MODE === MODE.SERVER) {
-              fetch("/llm", {
-                method: "POST", // Specify the method
-                headers: {
-                  "Content-Type": "application/json", // Specify the content type
-                },
-                body: JSON.stringify({
+          } else if (LLM_MODE === MODE.SERVER) {
+            fetch("/llm", {
+              method: "POST", // Specify the method
+              headers: {
+                "Content-Type": "application/json", // Specify the content type
+              },
+              body: JSON.stringify({
+                category,
+                query,
+              }), // Convert the JavaScript object to a JSON string
+            })
+              .then((response) => response.json()) // Parse the JSON response
+              .then((data) => {
+                eventBus.publish(EVENT_COPILOT_UPDATE, {
                   category,
-                  query,
-                }), // Convert the JavaScript object to a JSON string
+                  response: data.data,
+                });
               })
-                .then((response) => response.json()) // Parse the JSON response
-                .then((data) => {
-                  eventBus.publish("copilot.update", {
-                    category,
-                    response: data.data,
-                  });
-                })
-                .catch((error) => {
-                  console.error("Error:", error); // Handle any errors
-                });
-            } else {
-              wait(1000).then(() => {
-                eventBus.publish("copilot.update", {
-                  category,
-                  response: `{ "commands": { "t": { "id": "echo \`${query}\` as mock"} } }`,
-                });
+              .catch((error) => {
+                console.error("Error:", error); // Handle any errors
               });
-            }
+          } else {
+            wait(1000).then(() => {
+              eventBus.publish(EVENT_COPILOT_UPDATE, {
+                category,
+                response: `{ "commands": { "t": { "id": "echo \`${query}\` as mock"} } }`,
+              });
+            });
           }
-        );
-      }
-    };
-
-    initChatProvider();
+        }
+      ),
+    });
 
     return () => {
-      if (copilotSub.current) {
-        eventBus.unsubscribe("copilot.query", copilotSub.current);
-        copilotSub.current = null;
-      }
+      copilotSubs.current.forEach((sub) => {
+        eventBus.unsubscribe(sub.topic, sub.handler);
+      });
     };
   }, []);
 
