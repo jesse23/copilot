@@ -25,4 +25,4 @@ temp
 *.sw?
 
 # Environment
-.env.*
+.env.local

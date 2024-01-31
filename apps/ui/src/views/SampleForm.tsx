@@ -1,52 +1,47 @@
 import { Allotment } from "allotment";
 import { useCallback, useEffect, useState } from "react";
-import { FormControl, FormLabel, Input, Button } from "@chakra-ui/react";
+import { FormControl, FormLabel, Input, Button, Textarea } from "@chakra-ui/react";
 import { eventBus } from "../libs";
-import { CATEGORY_COMMAND_CONFIG } from "../const";
+import { CATEGORY_COMMAND_CONFIG, CATEGORY_INDICATOR_HELPER } from "../const";
 import { useCopilot } from "../components";
 import { EVENT_COPILOT_UPDATE} from "../const";
 import styles from "./views.module.css";
 import "allotment/dist/style.css";
 
+interface Indicator {
+  iconName: string;
+  modelTypes: string;
+  prop: string;
+}
+
 export function SampleForm() {
   const { setCategory } = useCopilot();
-  const [command, setCommand] = useState({
-    id: "",
-    iconId: "",
-    title: "",
-    action: "",
-    activeWhen: "",
-    visibleWhen: "",
-    uiAnchor: "",
-    priority: "",
-  });
+  const [indicator, setIndicator] = useState({
+    iconName: "",
+    modelTypes: "",
+    prop: "" 
+  } as Indicator);
 
-  const [result, setResult] = useState({});
+  const [result, setResult] = useState({} as Indicator);
 
   const onChange = useCallback((key, value) => {
-    setCommand((prev) => ({ ...prev, [key]: value }));
+    setIndicator((prev) => ({ ...prev, [key]: value }));
   }, []);
 
   // TODO: this should go with focus/active later
   useEffect(() => {
-    setCategory(CATEGORY_COMMAND_CONFIG);
+    setCategory(CATEGORY_INDICATOR_HELPER);
     const subs = eventBus.subscribe(EVENT_COPILOT_UPDATE, ({ response }) => {
-      const vm = JSON.parse(response);
-      const res = {
-        ...((Object.values(vm.commands) || [{}])[0] as Record<string, string>),
-        ...((Object.values(vm.commandHandlers || {}) || [{}])[0] as Record<
-          string,
-          string
-        >),
-        ...((Object.values(vm.commandPlacements || {}) || [{}])[0] as Record<
-          string,
-          string
-        >),
-      } as any;
-      if (res.visibleWhen?.condition) {
-        res.visibleWhen = res.visibleWhen.condition;
+      if (response.startsWith("```")) {
+        const responseInLines = response.split("\n");
+        response = responseInLines.slice(1, responseInLines.length - 1).join("\n");
       }
-      setCommand(res);
+      const jsonObj = JSON.parse(response);
+      setIndicator({
+        ...jsonObj,
+        modelTypes: jsonObj.modelTypes.join(","),
+        prop: jsonObj.prop ? JSON.stringify(jsonObj.prop, null, 2) : ""
+      });
     });
     return () => {
       eventBus.unsubscribe(EVENT_COPILOT_UPDATE, subs);
@@ -61,56 +56,26 @@ export function SampleForm() {
         <Allotment.Pane>
           <div style={{ padding: "10px" }}>
             <FormControl>
-              <FormLabel paddingTop={4}>Command ID</FormLabel>
+              <FormLabel paddingTop={4}>Model Types</FormLabel>
               <Input
-                type="id"
-                value={command.id}
-                onChange={(e) => onChange("id", e.target.value)}
+                type="modelTypes"
+                value={indicator.modelTypes}
+                onChange={(e) => onChange("modelTypes", e.target.value)}
               />
-              <FormLabel paddingTop={4}>Icon ID</FormLabel>
+              <FormLabel paddingTop={4}>Icon Name</FormLabel>
               <Input
-                type="iconId"
-                value={command.iconId}
-                onChange={(e) => onChange("iconId", e.target.value)}
+                type="iconName"
+                value={indicator.iconName}
+                onChange={(e) => onChange("iconName", e.target.value)}
               />
-              <FormLabel paddingTop={4}>Command Title</FormLabel>
-              <Input
-                type="title"
-                value={command.title}
-                onChange={(e) => onChange("title", e.target.value)}
+              <FormLabel paddingTop={4}>Property Condition</FormLabel>
+              <Textarea
+                value={indicator.prop}
+                onChange={(e) => onChange("prop", e.target.value)}
               />
               <FormLabel paddingTop={4}>Command Action</FormLabel>
-              <Input
-                type="action"
-                value={command.action}
-                onChange={(e) => onChange("action", e.target.value)}
-              />
-              <FormLabel paddingTop={4}>Active When</FormLabel>
-              <Input
-                type="activeWhen"
-                value={command.activeWhen}
-                onChange={(e) => onChange("activeWhen", e.target.value)}
-              />
-              <FormLabel paddingTop={4}>Visible When</FormLabel>
-              <Input
-                type="visibleWhen"
-                value={command.visibleWhen}
-                onChange={(e) => onChange("visibleWhen", e.target.value)}
-              />
-              <FormLabel paddingTop={4}>Command Bar</FormLabel>
-              <Input
-                type="uiAnchor"
-                value={command.uiAnchor}
-                onChange={(e) => onChange("uiAnchor", e.target.value)}
-              />
-              <FormLabel paddingTop={4}>Priority</FormLabel>
-              <Input
-                type="priority"
-                value={command.priority}
-                onChange={(e) => onChange("priority", e.target.value)}
-              />
               <div style={{ paddingTop: "20px" }}>
-                <Button onClick={() => setResult(command)}>
+                <Button onClick={() => setResult(indicator)}>
                   Create Command
                 </Button>
               </div>
@@ -119,7 +84,19 @@ export function SampleForm() {
         </Allotment.Pane>
         {/* Right Pane - Source + Target */}
         <Allotment.Pane>
-          <pre>{JSON.stringify(result, null, 2)}</pre>
+          <pre>{JSON.stringify({
+            ...result,
+            ...(
+              result.prop && {
+                prop: JSON.parse(result.prop)
+              }
+            ),
+            ...(
+              result.modelTypes && {
+                modelTypes: result.modelTypes.split(',')
+              }
+            )
+          }, null, 2)}</pre>
         </Allotment.Pane>
       </Allotment>
     </div>

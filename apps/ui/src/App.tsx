@@ -2,20 +2,21 @@ import { useEffect, useState } from "react";
 import { ChakraProvider } from "@chakra-ui/react";
 import { Grid, GridItem, Heading, Link, Spacer, Flex } from "@chakra-ui/react";
 import { CopilotProvider, CopilotWidget } from "./components";
-import { SampleEditor, SampleForm, SampleChat } from "./views";
+import { SampleForm, SampleChat } from "./views";
 import { eventBus } from "./libs";
 import { EVENT_COPILOT_DEBUG } from "./const";
-import { MonacoEditor } from "./components/MonacoEditor";
+import { SampleJSEditor } from "./views/SampleJSEditor";
+import { SampleIndicatorEditor } from "./views/SampleIndicatorEditor";
 
 const MODE = {
-  EDITOR: "json_editor",
-  FORM: "form_example",
-  CHAT: "chat_bot",
   CODE: "code_completion",
+  JSON: "indicator_helper",
+  FORM: "indicator_form",
+  CHAT: "chat_bot",
 };
 
 export default function App() {
-  const [mode, setMode] = useState(MODE.EDITOR);
+  const [mode, setMode] = useState(MODE.CODE);
   const [info, setInfo] = useState("");
 
   useEffect(() => {
@@ -68,10 +69,10 @@ export default function App() {
             borderTop="1px"
             borderColor={"#E2E8F0"}
           >
-            {mode === MODE.EDITOR && <SampleEditor />}
+            {mode === MODE.CODE && <SampleJSEditor />}
+            {mode === MODE.JSON && <SampleIndicatorEditor />}
             {mode === MODE.FORM && <SampleForm />}
             {mode === MODE.CHAT && <SampleChat />}
-            {mode === MODE.CODE && <MonacoEditor code='' type='js' onChange={()=>{}} />}
           </GridItem>
           <GridItem
             pl="2"
@@ -80,12 +81,20 @@ export default function App() {
             borderColor={"#E2E8F0"}
           >
             <Link
-              onClick={() => setMode(MODE.EDITOR)}
+              onClick={() => setMode(MODE.CODE)}
               paddingRight={5}
               fontFamily={"mono"}
             >
-              {MODE.EDITOR}
-              {mode === MODE.EDITOR ? "*" : " "}
+              {MODE.CODE}
+              {mode === MODE.CODE ? "*" : " "}
+            </Link>           
+            <Link
+              onClick={() => setMode(MODE.JSON)}
+              paddingRight={5}
+              fontFamily={"mono"}
+            >
+              {MODE.JSON}
+              {mode === MODE.JSON ? "*" : " "}
             </Link>
             <Link
               onClick={() => setMode(MODE.FORM)}
@@ -97,19 +106,11 @@ export default function App() {
             </Link>
             <Link
               onClick={() => setMode(MODE.CHAT)}
-              paddingRight={5}
+              paddingRight={70}
               fontFamily={"mono"}
             >
               {MODE.CHAT}
               {mode === MODE.CHAT ? "*" : " "}
-            </Link>
-            <Link
-              onClick={() => setMode(MODE.CODE)}
-              paddingRight={70}
-              fontFamily={"mono"}
-            >
-              {MODE.CODE}
-              {mode === MODE.CODE ? "*" : " "}
             </Link>
             <div
               style={{

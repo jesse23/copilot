@@ -1,3 +1,4 @@
 export { SampleChat } from "./SampleChat";
-export { SampleEditor } from "./SampleEditor";
 export { SampleForm } from "./SampleForm";
+export { SampleJSEditor } from "./SampleJSEditor";
+export { SampleIndicatorEditor } from "./SampleIndicatorEditor";
