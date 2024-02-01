@@ -46,7 +46,9 @@ const queryCompletion = async (category, query) => {
       const lastWord = lastLine.split(/\b/).pop() || "";
       if (response.startsWith("```")) {
         const responseInLines = response.split("\n");
-        response = responseInLines.slice(1, responseInLines.length - 1).join("\n");
+        response = responseInLines
+          .slice(1, responseInLines.length - 1)
+          .join("\n");
       } else if (response.startsWith(query)) {
         response = response.slice(query.length);
         response = lastWord + response;
@@ -82,6 +84,12 @@ export const MonacoEditor = ({ lang, text, category }: MonacoEditorProps) => {
       EVENT_COPILOT_UPDATE,
       ({ category: c, response }) => {
         if (c === category) {
+          if (response.startsWith("```")) {
+            const responseInLines = response.split("\n");
+            response = responseInLines
+              .slice(1, responseInLines.length - 1)
+              .join("\n");
+          }
           const code = editorRef.current.getValue();
           editorRef.current.setValue(code + "\n" + response);
         }

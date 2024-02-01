@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { eventBus, wait, Subscription } from "../libs";
+import { eventBus, Subscription, initLLM, queryLLM } from "../libs";
 import {
   EVENT_COPILOT_DEBUG,
   EVENT_COPILOT_QUERY,
@@ -7,7 +7,7 @@ import {
   EVENT_COPILOT_MODE_CHANGE,
   MODE_MOCK,
 } from "../const";
-import { initLLM, queryLLM } from "../libs/llm";
+import '../libs/vectors';
 
 const CopilotContext = createContext(null);
 
