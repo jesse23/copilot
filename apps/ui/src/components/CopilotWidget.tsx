@@ -2,16 +2,18 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-  PopoverHeader,
   PopoverBody,
   PopoverArrow,
   Button,
   Textarea,
   Kbd,
   Spinner,
-  Checkbox,
   Grid,
   Select,
+  FormLabel,
+  Input,
+  InputRightElement,
+  InputGroup,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -21,7 +23,6 @@ import {
   EVENT_COPILOT_DEBUG,
   EVENT_COPILOT_QUERY,
   EVENT_COPILOT_UPDATE,
-  EVENT_COPILOT_MODE_CHANGE,
   MODE_WEBLLM,
   MODE_MOCK,
   MODE_SERVER,
@@ -29,15 +30,16 @@ import {
 } from "../const";
 
 export const CopilotWidget = () => {
+  const { category, apiKey, setApiKey, mode, setMode } = useCopilot();
   const [isOpen, setIsOpen] = useState(false);
-  const initialFocusRef = useRef();
-  const { category } = useCopilot();
   const [query, setQuery] = useState("");
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+  const initialFocusRef = useRef();
 
   useHotkeys(
-    "mod+p,ctrl+p",
+    "mod+p,ctrl+p,esc",
     () => {
       setIsOpen(!isOpen);
     },
@@ -82,15 +84,8 @@ export const CopilotWidget = () => {
 
   return (
     <Grid templateColumns="repeat(2, 0.7fr)" gap={3}>
-      <Select
-        defaultValue={MODE_MOCK}
-        onChange={(e) =>
-          eventBus.publish(EVENT_COPILOT_MODE_CHANGE, { mode: e.target.value })
-        }
-      >
-        <option value={MODE_MOCK}>
-          Mock
-        </option>
+      <Select value={mode} onChange={(e) => setMode(e.target.value)}>
+        <option value={MODE_MOCK}>Mock</option>
         <option value={MODE_WEBLLM}>WebLLM (require 4GB cache)</option>
         <option value={MODE_OPENAI}>OpenAI (require api-key)</option>
         <option value={MODE_SERVER}>PyServer (localhost debug)</option>
@@ -114,7 +109,9 @@ export const CopilotWidget = () => {
         </PopoverTrigger>
         <PopoverContent>
           <PopoverArrow />
+          {/* 
           <PopoverHeader>Hints</PopoverHeader>
+          */}
           <PopoverBody>
             {loading ? (
               <Spinner
@@ -125,15 +122,37 @@ export const CopilotWidget = () => {
                 size="xl"
               />
             ) : (
-              <Textarea
-                ref={initialFocusRef}
-                value={value}
-                onChange={(e) => {
-                  setValue(e.target.value);
-                  setQueryDebounced(e.target.value);
-                }}
-                placeholder="Type whatever you need"
-              />
+              <>
+                <FormLabel paddingTop={4}>Prompt</FormLabel>
+                <Textarea
+                  ref={initialFocusRef}
+                  value={value}
+                  onChange={(e) => {
+                    setValue(e.target.value);
+                    setQueryDebounced(e.target.value);
+                  }}
+                  placeholder="Type whatever you need"
+                />
+                <FormLabel paddingTop={4}>OpenAI API Key</FormLabel>
+                <InputGroup size="md">
+                  <Input
+                    pr="4.5rem"
+                    type={showPass ? "text" : "password"}
+                    placeholder="Enter openai-api-key"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                  />
+                  <InputRightElement width="4.5rem">
+                    <Button
+                      h="1.75rem"
+                      size="sm"
+                      onClick={() => setShowPass((prev) => !prev)}
+                    >
+                      {showPass ? "Hide" : "Show"}
+                    </Button>
+                  </InputRightElement>
+                </InputGroup>
+              </>
             )}
           </PopoverBody>
         </PopoverContent>

@@ -1,7 +1,5 @@
 import { VectorStorage } from "vector-storage";
 
-const { COPILOT_CODEX_API_KEY } = import.meta.env;
-
 const VSTORE_NAME = "VectorStorageDatabase";
 
 const _ctx = {
@@ -68,13 +66,13 @@ export const queryVectorStore = async (query) => {
 };
 
 // Example usage
-export const initVectorStore = async () => {
+export const initVectorStore = async (apiKey) => {
   const dbExists = await checkIfIndexedDBExists(VSTORE_NAME);
 
-  if (COPILOT_CODEX_API_KEY) {
+  if (apiKey) {
     // Create an instance of VectorStorage
     _ctx.vStore = new VectorStorage<{category: string}>({
-      openAIApiKey: COPILOT_CODEX_API_KEY,
+      openAIApiKey: apiKey,
     });
     if (!dbExists) {
       // Add a text document to the store
@@ -136,5 +134,3 @@ export const initVectorStore = async () => {
     */
   }
 };
-
-initVectorStore();

@@ -15,7 +15,6 @@ export const CATEGORY_INDICATOR_HELPER_INLINE = 'indicator_helper_inline';
 export const CATEGORY_INDICATOR_HELPER_BACKUP = 'indicator_helper_inline';
 
 // event
-export const EVENT_COPILOT_MODE_CHANGE = 'copilot.mode_change';
 export const EVENT_COPILOT_DEBUG = 'copilot.debug';
 export const EVENT_COPILOT_UPDATE = 'copilot.update';
 export const EVENT_COPILOT_QUERY = 'copilot.query';

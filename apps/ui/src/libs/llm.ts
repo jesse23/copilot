@@ -3,17 +3,23 @@ import { MODE_OPENAI, MODE_SERVER, MODE_WEBLLM } from "../const";
 import { initLLM as initWebLLM, queryLLM as queryWebLLM } from "./web_llm";
 import { queryLLM as queryOpenAI } from "./openai";
 
+interface QueryContext {
+  mode: string;
+  category: string;
+  apiKey: string;
+}
+
 export const initLLM = async (mode, progressCallback) => {
   if (mode === MODE_WEBLLM) {
     return initWebLLM(progressCallback);
   }
 };
 
-export const queryLLM = async (mode: string, category: string, query: string): Promise<string> => {
+export const queryLLM = async (query: string, {mode, category, apiKey}: QueryContext): Promise<string> => {
   if (mode === MODE_WEBLLM) {
     return queryWebLLM(category, query);
   } else if (mode === MODE_OPENAI) {
-    return queryOpenAI(category, query);
+    return queryOpenAI(category, query, apiKey);
   } else if (mode === MODE_SERVER) {
     return fetch("/llm", {
       method: "POST", // Specify the method
