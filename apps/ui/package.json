@@ -20,12 +20,16 @@
     "@types/codeflask": "^1.4.4",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "@visheratin/tokenizers": "^0.1.5",
+    "@visheratin/web-ai": "^1.4.5",
     "@vitejs/plugin-react-swc": "^3.3.2",
+    "@xenova/transformers": "^2.14.2",
     "allotment": "^1.19.3",
     "codeflask": "^1.4.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
     "framer-motion": "^10.16.4",
+    "langchain": "^0.1.12",
     "monaco-editor": "^0.45.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -34,6 +38,9 @@
     "vite": "^4.4.5",
     "vite-plugin-monaco-editor": "^1.1.0",
     "vite-plugin-singlefile": "^0.13.5",
-    "vite-tsconfig-paths": "^4.2.1"
+    "vite-plugin-top-level-await": "^1.4.1",
+    "vite-plugin-wasm": "^3.3.0",
+    "vite-tsconfig-paths": "^4.2.1",
+    "voy-search": "^0.6.2"
   }
 }

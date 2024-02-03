@@ -76,7 +76,7 @@ export function SampleForm() {
               <FormLabel paddingTop={4}>Command Action</FormLabel>
               <div style={{ paddingTop: "20px" }}>
                 <Button onClick={() => setResult(indicator)}>
-                  Create Command
+                  Create Indicator 
                 </Button>
               </div>
             </FormControl>

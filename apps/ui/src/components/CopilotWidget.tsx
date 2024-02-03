@@ -58,12 +58,6 @@ export const CopilotWidget = () => {
       setIsOpen(false);
     });
 
-    setTimeout(() => {
-      eventBus.publish(
-        EVENT_COPILOT_DEBUG,
-        "NOTE: webLLM requires 4GB in browser cache storage, it could be purged from devTools."
-      );
-    }, 1000);
 
     return () => {
       eventBus.unsubscribe(EVENT_COPILOT_QUERY, loadingSub);

@@ -56,14 +56,14 @@ export const queryLLM = async (category: string, query: string, apiKey) => {
     const embeddings = await queryVectorStore(query);
 
     // 
-    const examples = embeddings.similarItems
-      // only get example with score > 0.5
+    const examples = embeddings
+      // only get example with score > 0.5. voy vector store is not returning so skip it for now
       .filter(
-        (item) => item.metadata.category === "example" && item.score > 0.5
+        (item) => item.metadata.category === "example" // && item.score > 0.5
       )
       // only get the first 3 for size limitation
       .slice(0, 2)
-      .map((item) => JSON.stringify(JSON.parse(item.text),null,2));
+      .map((item) => JSON.stringify(JSON.parse(item.pageContent),null,2));
 
     const finalPrompt = [
       {

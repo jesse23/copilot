@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { eventBus, Subscription, initLLM, queryLLM } from "../libs";
+import { eventBus, Subscription, initLLM, queryLLM, wait } from "../libs";
 import {
   EVENT_COPILOT_DEBUG,
   EVENT_COPILOT_QUERY,
@@ -14,13 +14,13 @@ import {
   MODE_MOCK,
 } from "../const";
 
-import {initVectorStore} from "../libs";
+import { initVectorStore } from "../libs";
 
 const { COPILOT_OPENAI_API_KEY } = import.meta.env;
 const CopilotContext = createContext(null);
 
 export const CopilotProvider = ({ children }) => {
-  const [apiKey, setApiKey] = useState(COPILOT_OPENAI_API_KEY||"");
+  const [apiKey, setApiKey] = useState(COPILOT_OPENAI_API_KEY || "");
   const [category, setCategory] = useState("");
   const [mode, setMode] = useState(MODE_MOCK);
 
@@ -36,8 +36,24 @@ export const CopilotProvider = ({ children }) => {
 
   // TODO: vector store needs api key for now
   useEffect(() => {
-    initVectorStore(apiKey);
-  }, [apiKey]);
+    const init = async () => {
+      await wait(1000);
+      eventBus.publish(
+        EVENT_COPILOT_DEBUG,
+        "Initializing Vector Store..."
+      );
+      await initVectorStore();
+      eventBus.publish(
+        EVENT_COPILOT_DEBUG,
+        "Vector Store initialized."
+      );
+      eventBus.publish(
+        EVENT_COPILOT_DEBUG,
+        "NOTE: webLLM requires 4GB in browser cache storage, it could be purged from devTools."
+      );
+    };
+    init();
+  }, []);
 
   // subscribe to copilot query
   useEffect(() => {
