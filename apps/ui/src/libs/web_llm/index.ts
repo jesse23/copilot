@@ -7,7 +7,7 @@ import {
 } from "../../const";
 import * as webllm from "@mlc-ai/web-llm";
 import appConfig from "./app_config";
-import { queryVectorStore } from "..";
+import { queryCommand } from "..";
 
 const PROMPTS = {
   /// what is 'Detroit'?
@@ -28,7 +28,7 @@ const createPrompt = (category: string, query: string) => {
 
 const createIndicatorPromptWithRetrieval = async (query: string) => {
     // retrieval augmented generation
-    const embeddings = await queryVectorStore(query);
+    const embeddings = await queryCommand(query) as any[];
 
     const examples = embeddings
       // only get example with score > 0.5. voy vector store is not returning so skip it for now

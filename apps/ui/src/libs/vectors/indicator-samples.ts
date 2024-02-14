@@ -1,4 +1,3 @@
-
 export const INDICATOR_SAMPLES = `
 {"id":"fx_release_status_list_approved","iconName":"ReleasedApproved","tooltip":{"showPropDisplayName":false,"propNames":["object_name","date_released"]},"prop":{"names":["release_status_list"],"type":{"names":["ReleaseStatus"],"prop":{"names":["object_name"],"conditions":{"object_name":{"$eq":"Approved"}}}}},"modelTypes":["WorkspaceObject"]}
 {"id":"fx_release_status_list_pending","iconName":"ReleasedPending","tooltip":{"showPropDisplayName":false,"propNames":["object_name","date_released"]},"prop":{"names":["release_status_list"],"type":{"names":["ReleaseStatus"],"prop":{"names":["object_name"],"conditions":{"object_name":{"$eq":"Pending"}}}}},"modelTypes":["WorkspaceObject"]}

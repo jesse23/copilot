@@ -9,6 +9,9 @@
     "build": "npm run build -ws",
     "test": "npm run test -ws"
   },
+  "devDependencies": {
+    "lodash": "^4.17.21"
+  },
   "workspaces": [
     "apps/*",
     "libs/*"

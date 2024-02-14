@@ -7,10 +7,12 @@ import { eventBus } from "./libs";
 import { EVENT_COPILOT_DEBUG } from "./const";
 import { SampleJSEditor } from "./views/SampleJSEditor";
 import { SampleIndicatorEditor } from "./views/SampleIndicatorEditor";
+import { SampleCommandEditor } from "./views/SampleCommandEditor";
 
 const MODE = {
   CODE: "code_completion",
   JSON: "indicator_helper",
+  CMD: "command_placement_helper",
   FORM: "indicator_form",
   CHAT: "chat_bot",
 };
@@ -71,6 +73,7 @@ export default function App() {
           >
             {mode === MODE.CODE && <SampleJSEditor />}
             {mode === MODE.JSON && <SampleIndicatorEditor />}
+            {mode === MODE.CMD && <SampleCommandEditor />}
             {mode === MODE.FORM && <SampleForm />}
             {mode === MODE.CHAT && <SampleChat />}
           </GridItem>
@@ -95,6 +98,14 @@ export default function App() {
             >
               {MODE.JSON}
               {mode === MODE.JSON ? "*" : " "}
+            </Link>
+            <Link
+              onClick={() => setMode(MODE.CMD)}
+              paddingRight={5}
+              fontFamily={"mono"}
+            >
+              {MODE.CMD}
+              {mode === MODE.CMD ? "*" : " "}
             </Link>
             <Link
               onClick={() => setMode(MODE.FORM)}
